@@ -1,0 +1,19 @@
+#!/bin/bash
+cd $HOME
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install -y git python-pip python-dev net-tools
+if [ ! -d $HOME/webUI ]; then
+  git clone https://github.com/stefvanhouten/webUI.git
+  cd $HOME/webUI
+  git checkout dev
+fi
+cd $HOME/webUI
+sudo pip install pipenv
+pipenv install
+ip=$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+sed -i "s/192.168.1.116/${ip}/g" $HOME/webUI/default.ini
+sed -i "s/192.168.1.207/${ip}/g" $HOME/webUI/default.ini
+sed -i "s/mock = false/mock = true/g" $HOME/webUI/default.ini
+pipenv shell
+python server.py
